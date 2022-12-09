@@ -10,8 +10,10 @@ namespace logs
     public:
         std::vector<std::string> getErrors();
         std::string getLastError();
-        void addError(std::string error);
         bool noError();
+
+    protected:
+        void addError(std::string error);
 
     private:
         std::vector<std::string> errors;

@@ -2,20 +2,18 @@
 
 network::tcp::client::client()
 {
-    this->errors = new logs::error();
 #ifdef _WIN32
     if (WSAStartup(MAKEWORD(2, 2), &(network::tcp::client::wsaData)) != 0)
-        this->errors->addError("Cannot initialize ws2!");
+        this->addError("Cannot initialize ws2!");
 #endif
     memset(&(this->hints), 0, sizeof(this->hints));
 }
 
 network::tcp::client::client(int socket_id)
 {
-    this->errors = new logs::error();
 #ifdef _WIN32
     if (WSAStartup(MAKEWORD(2, 2), &(network::tcp::client::wsaData)) != 0)
-        errors->addError("Cannot initialize ws2!");
+        this->addError("Cannot initialize ws2!");
 #endif
     memset(&(this->hints), 0, sizeof(this->hints));
     this->client_socket_id = socket_id;
@@ -49,7 +47,7 @@ bool network::tcp::client::setSocketAddress(std::string address, std::string por
 {
     if (getaddrinfo(address.c_str(), port.c_str(), &(this->hints), &(this->result)) != 0)
     {
-        this->errors->addError("Cannot get address info!");
+        this->addError("Cannot get address info!");
         return false;
     }
     else
@@ -63,7 +61,7 @@ bool network::tcp::client::createSocket()
     this->socket_id = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
     if (this->socket_id == -1)
     {
-        this->errors->addError("Cannot initialize socket!");
+        this->addError("Cannot initialize socket!");
         return false;
     }
     else
@@ -76,7 +74,7 @@ bool network::tcp::client::connectSocket()
 {
     if (connect(this->socket_id, this->result->ai_addr, this->result->ai_addrlen) == -1)
     {
-        this->errors->addError("Cannot connect!");
+        this->addError("Cannot connect!");
         return false;
     }
     else

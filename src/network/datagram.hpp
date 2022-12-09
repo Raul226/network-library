@@ -17,7 +17,7 @@ namespace network
 {
     namespace udp
     {
-        class datagram
+        class datagram : public logs::error
         {
         public:
             datagram();
@@ -36,7 +36,6 @@ namespace network
             int socket_id;
             struct addrinfo hints;
             struct addrinfo *result;
-            logs::error *errors;
         };
     }
 }

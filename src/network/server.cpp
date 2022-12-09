@@ -2,10 +2,9 @@
 
 network::tcp::server::server()
 {
-    this->errors = new logs::error();
 #ifdef _WIN32
     if (WSAStartup(MAKEWORD(2, 2), &(network::tcp::server::wsaData)) != 0)
-        this->errors->addError("Cannot initialize ws2!");
+        this->addError("Cannot initialize ws2!");
 #endif
     memset(&(this->hints), 0, sizeof(this->hints));
 }
@@ -34,7 +33,7 @@ bool network::tcp::server::setLocalSocketAddress(std::string port)
 {
     if (getaddrinfo(0, port.c_str(), &(this->hints), &(this->result)) != 0)
     {
-        this->errors->addError("Cannot get address info!");
+        this->addError("Cannot get address info!");
         return false;
     }
     else
@@ -48,7 +47,7 @@ bool network::tcp::server::createSocket()
     this->socket_id = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
     if (this->socket_id == -1)
     {
-        this->errors->addError("Cannot initialize socket!");
+        this->addError("Cannot initialize socket!");
         return false;
     }
     else
@@ -61,7 +60,7 @@ bool network::tcp::server::bindSocket()
 {
     if (bind(this->socket_id, this->result->ai_addr, this->result->ai_addrlen) == -1)
     {
-        this->errors->addError("Cannot bind socket!");
+        this->addError("Cannot bind socket!");
         return false;
     }
     else
@@ -74,7 +73,7 @@ int network::tcp::server::listenSocket()
 {
     if (listen(this->socket_id, 0) == -1)
     {
-        this->errors->addError("Cannot listen!");
+        this->addError("Cannot listen!");
         return 0;
     }
     else

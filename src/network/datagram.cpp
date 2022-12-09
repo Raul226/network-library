@@ -2,10 +2,9 @@
 
 network::udp::datagram::datagram()
 {
-    this->errors = new logs::error();
 #ifdef _WIN32
     if (WSAStartup(MAKEWORD(2, 2), &(network::udp::datagram::wsaData)) != 0)
-        this->errors->addError("Cannot initialize ws2!");
+        this->addError("Cannot initialize ws2!");
 #endif
     memset(&(this->hints), 0, sizeof(this->hints));
 }
@@ -34,7 +33,7 @@ bool network::udp::datagram::setLocalSocketAddress(std::string port)
 {
     if (getaddrinfo(0, port.c_str(), &(this->hints), &(this->result)) != 0)
     {
-        this->errors->addError("Cannot get address info!");
+        this->addError("Cannot get address info!");
         return false;
     }
     else
@@ -48,7 +47,7 @@ bool network::udp::datagram::createSocket()
     this->socket_id = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
     if (this->socket_id == -1)
     {
-        this->errors->addError("Cannot initialize socket!");
+        this->addError("Cannot initialize socket!");
         return false;
     }
     else
@@ -61,7 +60,7 @@ bool network::udp::datagram::bindSocket()
 {
     if (bind(this->socket_id, this->result->ai_addr, this->result->ai_addrlen) == -1)
     {
-        this->errors->addError("Cannot bind socket!");
+        this->addError("Cannot bind socket!");
         return false;
     }
     else
@@ -84,14 +83,14 @@ void network::udp::datagram::sendBufferTo(std::string address, std::string port,
 
     if (getaddrinfo(address.c_str(), port.c_str(), &udp_addrinfo_hints, &udp_addrinfo_result) != 0)
     {
-        this->errors->addError("Cannot get udp addrinfo!");
+        this->addError("Cannot get udp addrinfo!");
     }
     else
     {
         const char *buffer = new char[message.length()];
         buffer = message.c_str();
         if (sendto(this->socket_id, buffer, message.length(), 0, udp_addrinfo_result->ai_addr, udp_addrinfo_result->ai_addrlen) == -1)
-            this->errors->addError("Cannot send buffer!");
+            this->addError("Cannot send buffer!");
     }
 }
 
@@ -109,7 +108,7 @@ std::string network::udp::datagram::receiveBufferFrom(std::string address, std::
 
     if (getaddrinfo(address.c_str(), port.c_str(), &udp_addrinfo_hints, &udp_addrinfo_result) != 0)
     {
-        this->errors->addError("Cannot get udp addrinfo!");
+        this->addError("Cannot get udp addrinfo!");
         return "error";
     }
     else
@@ -124,7 +123,7 @@ std::string network::udp::datagram::receiveBufferFrom(std::string address, std::
 #endif
         if (receive == -1)
         {
-            this->errors->addError("Cannot receive buffer");
+            this->addError("Cannot receive buffer");
             return "error";
         }
         else

@@ -17,7 +17,7 @@ namespace network
 {
     namespace tcp
     {
-        class client
+        class client : public logs::error
         {
         public:
             client();
@@ -38,7 +38,6 @@ namespace network
             int client_socket_id;
             struct addrinfo hints;
             struct addrinfo *result;
-            logs::error *errors;
         };
     }
 }
