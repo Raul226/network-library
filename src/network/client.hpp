@@ -23,7 +23,7 @@ namespace network
             client();
             client(int socket_id);
             ~client();
-            void hintSetup(int domain, int type, int protocol, int flags);
+            void hintSetup(int family, int type, int protocol, int flags);
             bool setSocketAddress(std::string address, std::string port);
             bool createSocket();
             bool connectSocket();

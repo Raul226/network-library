@@ -1,5 +1,10 @@
 #include "client.hpp"
 
+/**
+ * @brief Default constructor for a client object
+ * If _WIN32 is defined it calls WSAStartup()
+ * Also it sets the bytes of hint structure to 0
+ */
 network::tcp::client::client()
 {
 #ifdef _WIN32
@@ -9,6 +14,11 @@ network::tcp::client::client()
     memset(&(this->hints), 0, sizeof(this->hints));
 }
 
+/**
+ * @brief Creates a network client object using the socket file descriptor received
+ *
+ * @param socket_id Socket file descriptor
+ */
 network::tcp::client::client(int socket_id)
 {
 #ifdef _WIN32
@@ -19,6 +29,10 @@ network::tcp::client::client(int socket_id)
     this->client_socket_id = socket_id;
 }
 
+/**
+ * @brief Used to close the client socket
+ * If _WIN32 is defined it calls WSACleanup()
+ */
 network::tcp::client::~client()
 {
 #ifdef _WIN32
@@ -35,6 +49,14 @@ network::tcp::client::~client()
 #endif
 }
 
+/**
+ * @brief Used to fill the hints structure
+ *
+ * @param af Family
+ * @param type Type
+ * @param protocol Protocol
+ * @param flags Flags
+ */
 void network::tcp::client::hintSetup(int af, int type, int protocol, int flags)
 {
     this->hints.ai_family = af;
@@ -43,6 +65,15 @@ void network::tcp::client::hintSetup(int af, int type, int protocol, int flags)
     this->hints.ai_flags = flags;
 }
 
+/**
+ * @brief Fills the result structure using the given address, port
+ * @brief and based on the hints specified using hintSetup() method
+ *
+ * @param address Address
+ * @param port Port
+ * @return true if the call to getaddrinfo() is successfull
+ * @return false if it fails
+ */
 bool network::tcp::client::setSocketAddress(std::string address, std::string port)
 {
     if (getaddrinfo(address.c_str(), port.c_str(), &(this->hints), &(this->result)) != 0)
@@ -56,6 +87,12 @@ bool network::tcp::client::setSocketAddress(std::string address, std::string por
     }
 }
 
+/**
+ * @brief Creates a socket based on the result from the setLocalSocketAddress() method
+ *
+ * @return true if the socket has been created
+ * @return false if it failed
+ */
 bool network::tcp::client::createSocket()
 {
     this->socket_id = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
@@ -70,6 +107,12 @@ bool network::tcp::client::createSocket()
     }
 }
 
+/**
+ * @brief Connects to the address and port specified by setSocketAddress() method
+ *
+ * @return true if it connected
+ * @return false if it failed
+ */
 bool network::tcp::client::connectSocket()
 {
     if (connect(this->socket_id, this->result->ai_addr, this->result->ai_addrlen) == -1)
@@ -84,16 +127,36 @@ bool network::tcp::client::connectSocket()
     }
 }
 
+/**
+ * @brief Sends a buffer to the connected socket
+ *
+ * @param message Buffer
+ */
 void network::tcp::client::sendBuffer(std::string message)
 {
     const char *buffer = new char[message.length()];
     buffer = message.c_str();
-    send(this->client_socket_id, buffer, message.length(), 0);
+    if (send(this->client_socket_id, buffer, message.length(), 0) == -1)
+        this->addError("Cannot send buffer!");
 }
 
+/**
+ * @brief Waiting for a buffer from the connection
+ *
+ * @param buffer_size Buffer size in byte
+ * @return The buffer it gets from the specified address, or an empty string if any errors occur
+ */
 std::string network::tcp::client::receiveBuffer(int buffer_size)
 {
     char *buffer = new char[buffer_size];
-    recv(this->client_socket_id, buffer, buffer_size, 0);
-    return buffer;
+    memset(buffer, 0, buffer_size);
+    if (recv(this->client_socket_id, buffer, buffer_size, 0) == -1)
+    {
+        this->addError("Cannot receive buffer");
+        return "";
+    }
+    else
+    {
+        return buffer;
+    }
 }

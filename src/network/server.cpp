@@ -1,5 +1,10 @@
 #include "server.hpp"
 
+/**
+ * @brief Default constructor for a server object
+ * If _WIN32 is defined it calls WSAStartup()
+ * Also it sets the bytes of hint structure to 0
+ */
 network::tcp::server::server()
 {
 #ifdef _WIN32
@@ -9,6 +14,10 @@ network::tcp::server::server()
     memset(&(this->hints), 0, sizeof(this->hints));
 }
 
+/**
+ * @brief Used to close the server socket
+ * If _WIN32 is defined it calls WSACleanup()
+ */
 network::tcp::server::~server()
 {
 #ifdef _WIN32
@@ -21,6 +30,14 @@ network::tcp::server::~server()
 #endif
 }
 
+/**
+ * @brief Used to fill the hints structure
+ *
+ * @param af Family
+ * @param type Type
+ * @param protocol Protocol
+ * @param flags Flags
+ */
 void network::tcp::server::hintSetup(int af, int type, int protocol, int flags)
 {
     this->hints.ai_family = af;
@@ -29,6 +46,14 @@ void network::tcp::server::hintSetup(int af, int type, int protocol, int flags)
     this->hints.ai_flags = flags;
 }
 
+/**
+ * @brief Gets the local machine address and fill the result structure
+ * @brief based on the hints specified using hintSetup() method
+ *
+ * @param port Port
+ * @return true if the call to getaddrinfo() is successfull
+ * @return false if it fails
+ */
 bool network::tcp::server::setLocalSocketAddress(std::string port)
 {
     if (getaddrinfo(0, port.c_str(), &(this->hints), &(this->result)) != 0)
@@ -42,6 +67,12 @@ bool network::tcp::server::setLocalSocketAddress(std::string port)
     }
 }
 
+/**
+ * @brief Creates a socket based on the result from the setLocalSocketAddress() method
+ *
+ * @return true if the socket has been created
+ * @return false if it failed
+ */
 bool network::tcp::server::createSocket()
 {
     this->socket_id = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
@@ -56,6 +87,12 @@ bool network::tcp::server::createSocket()
     }
 }
 
+/**
+ * @brief Binds the socket to the address and port from result
+ *
+ * @return true if the socket has been bound successfully
+ * @return false if it failed
+ */
 bool network::tcp::server::bindSocket()
 {
     if (bind(this->socket_id, this->result->ai_addr, this->result->ai_addrlen) == -1)
@@ -69,6 +106,11 @@ bool network::tcp::server::bindSocket()
     }
 }
 
+/**
+ * @brief Puts the socket into listening and if any connection request is received it accepts
+ *
+ * @return The client socket file descriptor
+ */
 int network::tcp::server::listenSocket()
 {
     if (listen(this->socket_id, 0) == -1)

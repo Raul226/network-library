@@ -1,5 +1,10 @@
 #include "datagram.hpp"
 
+/**
+ * @brief Default constructor for a datagram object
+ * If _WIN32 is defined it calls WSAStartup()
+ * Also it sets the bytes of hint structure to 0
+ */
 network::udp::datagram::datagram()
 {
 #ifdef _WIN32
@@ -9,6 +14,10 @@ network::udp::datagram::datagram()
     memset(&(this->hints), 0, sizeof(this->hints));
 }
 
+/**
+ * @brief Used to close the datagram socket
+ * If _WIN32 is defined it calls WSACleanup()
+ */
 network::udp::datagram::~datagram()
 {
 #ifdef _WIN32
@@ -21,6 +30,14 @@ network::udp::datagram::~datagram()
 #endif
 }
 
+/**
+ * @brief Used to fill the hints structure
+ *
+ * @param af Family
+ * @param type Type
+ * @param protocol Protocol
+ * @param flags Flags
+ */
 void network::udp::datagram::hintSetup(int af, int type, int protocol, int flags)
 {
     this->hints.ai_family = af;
@@ -29,6 +46,14 @@ void network::udp::datagram::hintSetup(int af, int type, int protocol, int flags
     this->hints.ai_flags = flags;
 }
 
+/**
+ * @brief Gets the local machine address and fill the result structure
+ * @brief based on the hints specified using hintSetup() method
+ *
+ * @param port Port
+ * @return true if the call to getaddrinfo() is successfull
+ * @return false if it fails
+ */
 bool network::udp::datagram::setLocalSocketAddress(std::string port)
 {
     if (getaddrinfo(0, port.c_str(), &(this->hints), &(this->result)) != 0)
@@ -42,6 +67,12 @@ bool network::udp::datagram::setLocalSocketAddress(std::string port)
     }
 }
 
+/**
+ * @brief Creates a socket based on the result from the setLocalSocketAddress() method
+ *
+ * @return true if the socket has been created
+ * @return false if it failed
+ */
 bool network::udp::datagram::createSocket()
 {
     this->socket_id = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
@@ -56,6 +87,12 @@ bool network::udp::datagram::createSocket()
     }
 }
 
+/**
+ * @brief Binds the socket to the address and port from result
+ *
+ * @return true if the socket has been bound successfully
+ * @return false if it failed
+ */
 bool network::udp::datagram::bindSocket()
 {
     if (bind(this->socket_id, this->result->ai_addr, this->result->ai_addrlen) == -1)
@@ -69,6 +106,13 @@ bool network::udp::datagram::bindSocket()
     }
 }
 
+/**
+ * @brief Sends a buffer to the specified address and port
+ *
+ * @param address Address
+ * @param port Port
+ * @param message Buffer
+ */
 void network::udp::datagram::sendBufferTo(std::string address, std::string port, std::string message)
 {
     struct addrinfo *udp_addrinfo_result;
@@ -94,6 +138,14 @@ void network::udp::datagram::sendBufferTo(std::string address, std::string port,
     }
 }
 
+/**
+ * @brief Receive a buffer from the specified address and port
+ *
+ * @param address Address
+ * @param port Port
+ * @param buffer_size Buffer size
+ * @return The buffer it gets from the specified address, or an empty string if any errors occur
+ */
 std::string network::udp::datagram::receiveBufferFrom(std::string address, std::string port, int buffer_size)
 {
     struct addrinfo *udp_addrinfo_result;
@@ -109,11 +161,12 @@ std::string network::udp::datagram::receiveBufferFrom(std::string address, std::
     if (getaddrinfo(address.c_str(), port.c_str(), &udp_addrinfo_hints, &udp_addrinfo_result) != 0)
     {
         this->addError("Cannot get udp addrinfo!");
-        return "error";
+        return "";
     }
     else
     {
-        char *buffer = new char[1024];
+        char *buffer = new char[buffer_size];
+        memset(buffer, 0, buffer_size);
         int receive = -1;
 #ifdef _WIN32
         int addrinfo_len = (int)udp_addrinfo_result->ai_addrlen;
@@ -124,7 +177,7 @@ std::string network::udp::datagram::receiveBufferFrom(std::string address, std::
         if (receive == -1)
         {
             this->addError("Cannot receive buffer");
-            return "error";
+            return "";
         }
         else
         {
