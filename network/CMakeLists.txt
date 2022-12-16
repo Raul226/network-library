@@ -1,0 +1,10 @@
+cmake_minimum_required(VERSION 3.6)
+project(network VERSION 1.0)
+
+add_library(network server.cpp client.cpp connection.cpp datagram.cpp)
+add_subdirectory("${CMAKE_SOURCE_DIR}/network/log")
+target_include_directories(network PUBLIC "${CMAKE_SOURCE_DIR}/network/log")
+target_link_libraries(network PUBLIC log)
+if(WIN32)
+    target_link_libraries(network PUBLIC Ws2_32.lib)
+endif()
