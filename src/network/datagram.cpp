@@ -33,16 +33,14 @@ network::udp::datagram::~datagram()
 /**
  * @brief Used to fill the hints structure
  *
- * @param af Family
- * @param type Type
- * @param protocol Protocol
+ * @param family Family
  * @param flags Flags
  */
-void network::udp::datagram::hintSetup(int af, int type, int protocol, int flags)
+void network::udp::datagram::hintSetup(int family, int flags)
 {
-    this->hints.ai_family = af;
-    this->hints.ai_socktype = type;
-    this->hints.ai_protocol = protocol;
+    this->hints.ai_family = family;
+    this->hints.ai_socktype = SOCK_DGRAM;
+    this->hints.ai_protocol = IPPROTO_UDP;
     this->hints.ai_flags = flags;
 }
 

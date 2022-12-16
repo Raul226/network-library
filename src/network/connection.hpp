@@ -17,15 +17,11 @@ namespace network
 {
     namespace tcp
     {
-        class client : public logs::error
+        class connection : public logs::error
         {
         public:
-            client();
-            ~client();
-            void hintSetup(int family, int flags);
-            bool setSocketAddress(std::string address, std::string port);
-            bool createSocket();
-            bool connectSocket();
+            connection(int socket_id);
+            ~connection();
             void sendBuffer(std::string message);
             std::string receiveBuffer(int buffer_size);
 
@@ -34,8 +30,6 @@ namespace network
             WSADATA wsaData;
 #endif
             int socket_id;
-            struct addrinfo hints;
-            struct addrinfo *result;
         };
     }
 }

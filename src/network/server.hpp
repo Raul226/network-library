@@ -22,7 +22,7 @@ namespace network
         public:
             server();
             ~server();
-            void hintSetup(int family, int type, int protocol, int flags);
+            void hintSetup(int family, int flags);
             bool setLocalSocketAddress(std::string port);
             bool createSocket();
             bool bindSocket();

@@ -15,21 +15,6 @@ network::tcp::client::client()
 }
 
 /**
- * @brief Creates a network client object using the socket file descriptor received
- *
- * @param socket_id Socket file descriptor
- */
-network::tcp::client::client(int socket_id)
-{
-#ifdef _WIN32
-    if (WSAStartup(MAKEWORD(2, 2), &(network::tcp::client::wsaData)) != 0)
-        this->addError("Cannot initialize ws2!");
-#endif
-    memset(&(this->hints), 0, sizeof(this->hints));
-    this->client_socket_id = socket_id;
-}
-
-/**
  * @brief Used to close the client socket
  * If _WIN32 is defined it calls WSACleanup()
  */
@@ -37,31 +22,25 @@ network::tcp::client::~client()
 {
 #ifdef _WIN32
     shutdown(this->socket_id, SD_SEND);
-    shutdown(this->client_socket_id, SD_SEND);
     closesocket(this->socket_id);
-    closesocket(this->client_socket_id);
     WSACleanup();
 #else
     shutdown(this->socket_id, SHUT_RDWR);
-    shutdown(this->client_socket_id, SHUT_RDWR);
     close(this->socket_id);
-    close(this->client_socket_id);
 #endif
 }
 
 /**
  * @brief Used to fill the hints structure
  *
- * @param af Family
- * @param type Type
- * @param protocol Protocol
+ * @param family Family
  * @param flags Flags
  */
-void network::tcp::client::hintSetup(int af, int type, int protocol, int flags)
+void network::tcp::client::hintSetup(int family, int flags)
 {
-    this->hints.ai_family = af;
-    this->hints.ai_socktype = type;
-    this->hints.ai_protocol = protocol;
+    this->hints.ai_family = family;
+    this->hints.ai_socktype = SOCK_STREAM;
+    this->hints.ai_protocol = IPPROTO_TCP;
     this->hints.ai_flags = flags;
 }
 
@@ -122,7 +101,6 @@ bool network::tcp::client::connectSocket()
     }
     else
     {
-        this->client_socket_id = this->socket_id;
         return true;
     }
 }
@@ -136,7 +114,7 @@ void network::tcp::client::sendBuffer(std::string message)
 {
     const char *buffer = new char[message.length()];
     buffer = message.c_str();
-    if (send(this->client_socket_id, buffer, message.length(), 0) == -1)
+    if (send(this->socket_id, buffer, message.length(), 0) == -1)
         this->addError("Cannot send buffer!");
 }
 
@@ -150,7 +128,7 @@ std::string network::tcp::client::receiveBuffer(int buffer_size)
 {
     char *buffer = new char[buffer_size];
     memset(buffer, 0, buffer_size);
-    if (recv(this->client_socket_id, buffer, buffer_size, 0) == -1)
+    if (recv(this->socket_id, buffer, buffer_size, 0) == -1)
     {
         this->addError("Cannot receive buffer");
         return "";
