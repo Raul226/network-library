@@ -23,7 +23,7 @@ By creating a **client** object you can connect to a server by specifying the ad
 You cannot create a **connection** object without having a valid socket file descriptor.
 To get a socket file descriptor you need to accept a connection on a **server** object
 
-## Datagram - UDP
+## Datagram Class - UDP
 
 To create a UDP datagram server you need to bind the object to a port on the local machine.
 Otherwise, to use the socket as a UDP client you don't have to bind it, you can directly send/receive packets.
