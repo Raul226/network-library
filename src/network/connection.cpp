@@ -35,31 +35,29 @@ network::tcp::connection::~connection()
  *
  * @param message Buffer
  */
-void network::tcp::connection::sendBuffer(std::string message)
+void network::tcp::connection::sendBuffer(char *buffer, unsigned int buffer_size)
 {
-    const char *buffer = new char[message.length()];
-    buffer = message.c_str();
-    if (send(this->socket_id, buffer, message.length(), 0) == -1)
+    if (send(this->socket_id, buffer, buffer_size, 0) == -1)
         this->addError("Cannot send buffer!");
 }
 
 /**
  * @brief Waiting for a buffer from the connection
  *
- * @param buffer_size Buffer size in byte
- * @return The buffer it gets from the connected socket, or an empty string if any errors occur
+ * @param buffer_size Buffer Size
+ * @return The size of the received buffer
  */
-std::string network::tcp::connection::receiveBuffer(int buffer_size)
+unsigned int network::tcp::connection::receiveBuffer(char *buffer, unsigned int buffer_size)
 {
-    char *buffer = new char[buffer_size];
     memset(buffer, 0, buffer_size);
-    if (recv(this->socket_id, buffer, buffer_size, 0) == -1)
+    int receive = recv(this->socket_id, buffer, buffer_size, 0);
+    if (receive == -1)
     {
         this->addError("Cannot receive buffer");
-        return "";
+        return 0;
     }
     else
     {
-        return buffer;
+        return receive;
     }
 }

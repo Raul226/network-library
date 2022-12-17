@@ -22,8 +22,8 @@ namespace network
         public:
             connection(int socket_id);
             ~connection();
-            void sendBuffer(std::string message);
-            std::string receiveBuffer(int buffer_size);
+            void sendBuffer(char *buffer, unsigned int buffer_size);
+            unsigned int receiveBuffer(char *buffer, unsigned int buffer_size);
 
         private:
 #ifdef _WIN32

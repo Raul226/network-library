@@ -105,29 +105,30 @@ bool network::tcp::server::bindSocket()
 }
 
 /**
- * @brief Puts the socket into listening and if any connection request is received it accepts
+ * @brief Puts the socket into listening
  *
- * @return The client socket file descriptor
  */
-int network::tcp::server::listenSocket()
+void network::tcp::server::listenSocket()
 {
     if (listen(this->socket_id, 0) == -1)
-    {
         this->addError("Cannot listen!");
-        return 0;
+}
+
+/**
+ * @brief Waits and accept any connection
+ *
+ * @return The connection socket file descriptor
+ */
+int network::tcp::server::acceptConnection()
+{
+    int client_socket_id = accept(this->socket_id, 0, 0);
+    if (client_socket_id != -1)
+    {
+        return client_socket_id;
     }
     else
     {
-        int client_socket_id = -1;
-        client_socket_id = accept(this->socket_id, 0, 0);
-        if (client_socket_id != -1)
-        {
-            return client_socket_id;
-        }
-        else
-        {
-            return 0;
-        }
         return 0;
     }
+    return 0;
 }

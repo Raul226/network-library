@@ -26,8 +26,8 @@ namespace network
             bool setLocalSocketAddress(std::string port);
             bool createSocket();
             bool bindSocket();
-            void sendBufferTo(std::string address, std::string port, std::string message);
-            std::string receiveBufferFrom(std::string address, std::string port, int buffer_size);
+            void sendBufferTo(std::string address, std::string port, char *buffer, unsigned int buffer_size);
+            unsigned int receiveBufferFrom(std::string address, std::string port, char *buffer, unsigned int buffer_size);
 
         private:
 #ifdef _WIN32

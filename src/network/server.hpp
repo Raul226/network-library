@@ -26,7 +26,8 @@ namespace network
             bool setLocalSocketAddress(std::string port);
             bool createSocket();
             bool bindSocket();
-            int listenSocket();
+            void listenSocket();
+            int acceptConnection();
 
         private:
 #ifdef _WIN32

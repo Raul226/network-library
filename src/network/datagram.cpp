@@ -109,9 +109,10 @@ bool network::udp::datagram::bindSocket()
  *
  * @param address Address
  * @param port Port
- * @param message Buffer
+ * @param buffer Buffer
+ * @param buffer_size Buffer Size
  */
-void network::udp::datagram::sendBufferTo(std::string address, std::string port, std::string message)
+void network::udp::datagram::sendBufferTo(std::string address, std::string port, char *buffer, unsigned int buffer_size)
 {
     struct addrinfo *udp_addrinfo_result;
     struct addrinfo udp_addrinfo_hints;
@@ -129,22 +130,21 @@ void network::udp::datagram::sendBufferTo(std::string address, std::string port,
     }
     else
     {
-        const char *buffer = new char[message.length()];
-        buffer = message.c_str();
-        if (sendto(this->socket_id, buffer, message.length(), 0, udp_addrinfo_result->ai_addr, udp_addrinfo_result->ai_addrlen) == -1)
+        if (sendto(this->socket_id, buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, udp_addrinfo_result->ai_addrlen) == -1)
             this->addError("Cannot send buffer!");
     }
 }
 
 /**
- * @brief Receive a buffer from the specified address and port
+ * @brief Receives a buffer from the specified address and port
  *
  * @param address Address
  * @param port Port
- * @param buffer_size Buffer size
- * @return The buffer it gets from the specified address, or an empty string if any errors occur
+ * @param buffer Buffer
+ * @param buffer_size Buffer Size
+ * @return The size of the received buffer
  */
-std::string network::udp::datagram::receiveBufferFrom(std::string address, std::string port, int buffer_size)
+unsigned int network::udp::datagram::receiveBufferFrom(std::string address, std::string port, char *buffer, unsigned int buffer_size)
 {
     struct addrinfo *udp_addrinfo_result;
     struct addrinfo udp_addrinfo_hints;
@@ -159,11 +159,10 @@ std::string network::udp::datagram::receiveBufferFrom(std::string address, std::
     if (getaddrinfo(address.c_str(), port.c_str(), &udp_addrinfo_hints, &udp_addrinfo_result) != 0)
     {
         this->addError("Cannot get udp addrinfo!");
-        return "";
+        return 0;
     }
     else
     {
-        char *buffer = new char[buffer_size];
         memset(buffer, 0, buffer_size);
         int receive = -1;
 #ifdef _WIN32
@@ -175,11 +174,11 @@ std::string network::udp::datagram::receiveBufferFrom(std::string address, std::
         if (receive == -1)
         {
             this->addError("Cannot receive buffer");
-            return "";
+            return 0;
         }
         else
         {
-            return buffer;
+            return receive;
         }
     }
 }
