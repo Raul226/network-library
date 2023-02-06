@@ -16,18 +16,12 @@ network::tcp::server::server()
 
 /**
  * @brief Used to close the server socket
- * If _WIN32 is defined it calls WSACleanup()
+ * It calls both shutdownSocket and closeSocket
  */
 network::tcp::server::~server()
 {
-#ifdef _WIN32
-    shutdown(this->socket_id, SD_SEND);
-    closesocket(this->socket_id);
-    WSACleanup();
-#else
-    shutdown(this->socket_id, SHUT_RDWR);
-    close(this->socket_id);
-#endif
+    this->shutdownSocket(SHUTDOWN_BOTH);
+    this->closeSocket();
 }
 
 /**
@@ -131,4 +125,27 @@ int network::tcp::server::acceptConnection()
         return 0;
     }
     return 0;
+}
+
+/**
+ * @brief It shutdown the socket
+ *
+ * @param how How to shutdown the socket(SHUTDOWN_RECEIVE, SHUTDOWN_SEND or SHUTDOWN_BOTH)
+ */
+void network::tcp::server::shutdownSocket(int how)
+{
+    shutdown(this->socket_id, how);
+}
+
+/**
+ * @brief It closes the socket file descriptor(on _WIN32 system it calls both closesocket and WSACleanup)
+ */
+void network::tcp::server::closeSocket()
+{
+#ifdef _WIN32
+    closesocket(this->socket_id);
+    WSACleanup();
+#else
+    close(this->socket_id);
+#endif
 }

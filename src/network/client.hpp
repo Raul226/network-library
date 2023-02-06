@@ -13,6 +13,10 @@
 
 #include "log.hpp"
 
+#define SHUTDOWN_RECEIVE 0
+#define SHUTDOWN_SEND 1
+#define SHUTDOWN_BOTH 3
+
 namespace network
 {
     namespace tcp
@@ -28,6 +32,8 @@ namespace network
             bool connectSocket();
             void sendBuffer(char *buffer, unsigned int buffer_size);
             unsigned int receiveBuffer(char *buffer, unsigned int buffer_size);
+            void shutdownSocket(int how);
+            void closeSocket();
 
         private:
 #ifdef _WIN32

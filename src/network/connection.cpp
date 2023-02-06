@@ -20,14 +20,8 @@ network::tcp::connection::connection(int socket_id)
  */
 network::tcp::connection::~connection()
 {
-#ifdef _WIN32
-    shutdown(this->socket_id, SD_SEND);
-    closesocket(this->socket_id);
-    WSACleanup();
-#else
-    shutdown(this->socket_id, SHUT_RDWR);
-    close(this->socket_id);
-#endif
+    this->shutdownSocket(SHUTDOWN_BOTH);
+    this->closeSocket();
 }
 
 /**
@@ -60,4 +54,27 @@ unsigned int network::tcp::connection::receiveBuffer(char *buffer, unsigned int 
     {
         return receive;
     }
+}
+
+/**
+ * @brief It shutdown the socket
+ *
+ * @param how How to shutdown the socket(SHUTDOWN_RECEIVE, SHUTDOWN_SEND or SHUTDOWN_BOTH)
+ */
+void network::tcp::connection::shutdownSocket(int how)
+{
+    shutdown(this->socket_id, how);
+}
+
+/**
+ * @brief It closes the socket file descriptor(on _WIN32 system it calls both closesocket and WSACleanup)
+ */
+void network::tcp::connection::closeSocket()
+{
+#ifdef _WIN32
+    closesocket(this->socket_id);
+    WSACleanup();
+#else
+    close(this->socket_id);
+#endif
 }

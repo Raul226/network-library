@@ -13,6 +13,10 @@
 
 #include "log.hpp"
 
+#define SHUTDOWN_RECEIVE 0
+#define SHUTDOWN_SEND 1
+#define SHUTDOWN_BOTH 3
+
 namespace network
 {
     namespace udp
@@ -28,6 +32,8 @@ namespace network
             bool bindSocket();
             void sendBufferTo(std::string address, std::string port, char *buffer, unsigned int buffer_size);
             unsigned int receiveBufferFrom(std::string address, std::string port, char *buffer, unsigned int buffer_size);
+            void shutdownSocket(int how);
+            void closeSocket();
 
         private:
 #ifdef _WIN32
