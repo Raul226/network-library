@@ -61,7 +61,7 @@ bool network::tcp::client::setSocketAddress(std::string address, std::string por
 }
 
 /**
- * @brief Creates a socket based on the result from the setLocalSocketAddress() method
+ * @brief Creates a socket based on the result from the setSocketAddress() method
  *
  * @return true if the socket has been created
  * @return false if it failed
