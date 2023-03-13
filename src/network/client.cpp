@@ -68,8 +68,8 @@ bool network::tcp::client::setSocketAddress(std::string address, std::string por
  */
 bool network::tcp::client::createSocket()
 {
-    this->socket_id = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
-    if (this->socket_id == -1)
+    this->socket_fd = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
+    if (this->socket_fd == -1)
     {
         this->addError("Cannot initialize socket!");
         return false;
@@ -88,7 +88,7 @@ bool network::tcp::client::createSocket()
  */
 bool network::tcp::client::connectSocket()
 {
-    if (connect(this->socket_id, this->result->ai_addr, this->result->ai_addrlen) == -1)
+    if (connect(this->socket_fd, this->result->ai_addr, this->result->ai_addrlen) == -1)
     {
         this->addError("Cannot connect!");
         return false;
@@ -100,6 +100,16 @@ bool network::tcp::client::connectSocket()
 }
 
 /**
+ * @brief Gets the client socket file descriptor
+ *
+ * @return the client socket file descriptor
+ */
+unsigned int network::tcp::client::getSocketFileDescriptor()
+{
+    return this->socket_fd;
+}
+
+/**
  * @brief Sends a buffer to the connected socket
  *
  * @param buffer Buffer
@@ -107,7 +117,7 @@ bool network::tcp::client::connectSocket()
  */
 void network::tcp::client::sendBuffer(char *buffer, unsigned int buffer_size)
 {
-    if (send(this->socket_id, buffer, buffer_size, 0) == -1)
+    if (send(this->socket_fd, buffer, buffer_size, 0) == -1)
         this->addError("Cannot send buffer!");
 }
 
@@ -121,7 +131,7 @@ void network::tcp::client::sendBuffer(char *buffer, unsigned int buffer_size)
 unsigned int network::tcp::client::receiveBuffer(char *buffer, unsigned int buffer_size)
 {
     memset(buffer, 0, buffer_size);
-    int receive = recv(this->socket_id, buffer, buffer_size, 0);
+    int receive = recv(this->socket_fd, buffer, buffer_size, 0);
     if (receive == -1)
     {
         this->addError("Cannot receive buffer");
@@ -140,7 +150,7 @@ unsigned int network::tcp::client::receiveBuffer(char *buffer, unsigned int buff
  */
 void network::tcp::client::shutdownSocket(int how)
 {
-    shutdown(this->socket_id, how);
+    shutdown(this->socket_fd, how);
 }
 
 /**
@@ -149,9 +159,9 @@ void network::tcp::client::shutdownSocket(int how)
 void network::tcp::client::closeSocket()
 {
 #ifdef _WIN32
-    closesocket(this->socket_id);
+    closesocket(this->socket_fd);
     WSACleanup();
 #else
-    close(this->socket_id);
+    close(this->socket_fd);
 #endif
 }

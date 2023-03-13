@@ -30,6 +30,7 @@ namespace network
             bool setSocketAddress(std::string address, std::string port);
             bool createSocket();
             bool connectSocket();
+            unsigned int getSocketFileDescriptor();
             void sendBuffer(char *buffer, unsigned int buffer_size);
             unsigned int receiveBuffer(char *buffer, unsigned int buffer_size);
             void shutdownSocket(int how);
@@ -39,7 +40,7 @@ namespace network
 #ifdef _WIN32
             WSADATA wsaData;
 #endif
-            int socket_id;
+            int socket_fd;
             struct addrinfo hints;
             struct addrinfo *result;
         };

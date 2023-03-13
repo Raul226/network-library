@@ -32,6 +32,7 @@ namespace network
             bool bindSocket();
             void listenSocket();
             int acceptConnection();
+            unsigned int getSocketFileDescriptor();
             void shutdownSocket(int how);
             void closeSocket();
 
@@ -39,7 +40,7 @@ namespace network
 #ifdef _WIN32
             WSADATA wsaData;
 #endif
-            int socket_id;
+            int socket_fd;
             struct addrinfo hints;
             struct addrinfo *result;
         };

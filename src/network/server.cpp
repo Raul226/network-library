@@ -67,8 +67,8 @@ bool network::tcp::server::setLocalSocketAddress(std::string port)
  */
 bool network::tcp::server::createSocket()
 {
-    this->socket_id = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
-    if (this->socket_id == -1)
+    this->socket_fd = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
+    if (this->socket_fd == -1)
     {
         this->addError("Cannot initialize socket!");
         return false;
@@ -87,7 +87,7 @@ bool network::tcp::server::createSocket()
  */
 bool network::tcp::server::bindSocket()
 {
-    if (bind(this->socket_id, this->result->ai_addr, this->result->ai_addrlen) == -1)
+    if (bind(this->socket_fd, this->result->ai_addr, this->result->ai_addrlen) == -1)
     {
         this->addError("Cannot bind socket!");
         return false;
@@ -104,7 +104,7 @@ bool network::tcp::server::bindSocket()
  */
 void network::tcp::server::listenSocket()
 {
-    if (listen(this->socket_id, 0) == -1)
+    if (listen(this->socket_fd, 0) == -1)
         this->addError("Cannot listen!");
 }
 
@@ -115,10 +115,10 @@ void network::tcp::server::listenSocket()
  */
 int network::tcp::server::acceptConnection()
 {
-    int client_socket_id = accept(this->socket_id, 0, 0);
-    if (client_socket_id != -1)
+    int client_socket_fd = accept(this->socket_fd, 0, 0);
+    if (client_socket_fd != -1)
     {
-        return client_socket_id;
+        return client_socket_fd;
     }
     else
     {
@@ -128,13 +128,23 @@ int network::tcp::server::acceptConnection()
 }
 
 /**
+ * @brief Gets the server socket file descriptor
+ *
+ * @return the server socket file descriptor
+ */
+unsigned int network::tcp::server::getSocketFileDescriptor()
+{
+    return this->socket_fd;
+}
+
+/**
  * @brief It shutdown the socket
  *
  * @param how How to shutdown the socket(SHUTDOWN_RECEIVE, SHUTDOWN_SEND or SHUTDOWN_BOTH)
  */
 void network::tcp::server::shutdownSocket(int how)
 {
-    shutdown(this->socket_id, how);
+    shutdown(this->socket_fd, how);
 }
 
 /**
@@ -143,9 +153,9 @@ void network::tcp::server::shutdownSocket(int how)
 void network::tcp::server::closeSocket()
 {
 #ifdef _WIN32
-    closesocket(this->socket_id);
+    closesocket(this->socket_fd);
     WSACleanup();
 #else
-    close(this->socket_id);
+    close(this->socket_fd);
 #endif
 }
