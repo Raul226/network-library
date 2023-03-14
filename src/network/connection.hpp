@@ -35,7 +35,7 @@ namespace network
             void closeSocket();
 
         private:
-            sockaddr_in *getSocketData();
+            sockaddr_in getSocketData();
 #ifdef _WIN32
             WSADATA wsaData;
 #endif

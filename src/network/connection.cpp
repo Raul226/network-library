@@ -71,11 +71,14 @@ unsigned int network::tcp::connection::receiveBuffer(char *buffer, unsigned int 
  *
  * @return a sockaddr_in struct with the connection information
  */
-sockaddr_in *network::tcp::connection::getSocketData()
+sockaddr_in network::tcp::connection::getSocketData()
 {
-    sockaddr_in *socket_data;
-    socklen_t *socket_data_length;
-    getsockname(this->socket_fd, (sockaddr *)socket_data, socket_data_length);
+    sockaddr_in socket_data;
+    memset(&socket_data, 0, sizeof(socket_data));
+    socklen_t socket_data_length = sizeof(socket_data);
+    if (getsockname(this->socket_fd, (sockaddr *)&socket_data, &socket_data_length) != 0)
+        this->addError("Cannot get socket data");
+
     return socket_data;
 }
 
@@ -86,7 +89,7 @@ sockaddr_in *network::tcp::connection::getSocketData()
  */
 std::string network::tcp::connection::getAddress()
 {
-    return inet_ntoa(this->getSocketData()->sin_addr);
+    return inet_ntoa(this->getSocketData().sin_addr);
 }
 
 /**
@@ -96,9 +99,8 @@ std::string network::tcp::connection::getAddress()
  */
 std::string network::tcp::connection::getPort()
 {
-    return std::to_string(this->getSocketData()->sin_port);
+    return std::to_string(this->getSocketData().sin_port);
 }
-
 /**
  * @brief It shutdown the socket
  *
