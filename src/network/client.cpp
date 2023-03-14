@@ -100,6 +100,29 @@ bool network::tcp::client::connectSocket()
 }
 
 /**
+ * @brief Uses getsockname to get client socket data
+ *
+ * @return a sockaddr_in struct with the client information
+ */
+sockaddr_in *network::tcp::client::getSocketData()
+{
+    sockaddr_in *socket_data;
+    socklen_t *socket_data_length;
+    getsockname(this->socket_fd, (sockaddr *)socket_data, socket_data_length);
+    return socket_data;
+}
+
+/**
+ * @brief Used to get the client IP address
+ *
+ * @return the client IP address as a std::string
+ */
+std::string network::tcp::client::getAddress()
+{
+    return inet_ntoa(this->getSocketData()->sin_addr);
+}
+
+/**
  * @brief Gets the client socket file descriptor
  *
  * @return the client socket file descriptor
