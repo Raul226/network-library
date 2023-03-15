@@ -99,6 +99,42 @@ bool network::udp::datagram::bindSocket()
 }
 
 /**
+ * @brief Uses getsockname to get datagram socket data
+ *
+ * @return a sockaddr_in struct with the datagram information
+ */
+sockaddr_in network::udp::datagram::getSocketData()
+{
+    sockaddr_in socket_data;
+    memset(&socket_data, 0, sizeof(socket_data));
+    socklen_t socket_data_length = sizeof(socket_data);
+    if (getsockname(this->socket_fd, (sockaddr *)&socket_data, &socket_data_length) != 0)
+        this->addError("Cannot get socket data");
+
+    return socket_data;
+}
+
+/**
+ * @brief Used to get the datagram IP address
+ *
+ * @return the datagram IP address as a std::string
+ */
+std::string network::udp::datagram::getAddress()
+{
+    return inet_ntoa(this->getSocketData().sin_addr);
+}
+
+/**
+ * @brief Used to get the datagram port
+ *
+ * @return the datagram port as a std::string
+ */
+std::string network::udp::datagram::getPort()
+{
+    return std::to_string(this->getSocketData().sin_port);
+}
+
+/**
  * @brief Gets the datagram socket file descriptor
  *
  * @return the datagram socket file descriptor

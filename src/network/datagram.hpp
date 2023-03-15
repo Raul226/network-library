@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 #endif
 
 #include <string>
@@ -30,6 +31,8 @@ namespace network
             bool setLocalSocketAddress(std::string port);
             bool createSocket();
             bool bindSocket();
+            std::string getAddress();
+            std::string getPort();
             unsigned int getSocketFileDescriptor();
             void sendBufferTo(std::string address, std::string port, char *buffer, unsigned int buffer_size);
             unsigned int receiveBufferFrom(std::string address, std::string port, char *buffer, unsigned int buffer_size);
@@ -37,6 +40,7 @@ namespace network
             void closeSocket();
 
         private:
+            sockaddr_in getSocketData();
 #ifdef _WIN32
             WSADATA wsaData;
 #endif

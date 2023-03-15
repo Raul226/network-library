@@ -128,6 +128,42 @@ int network::tcp::server::acceptConnection()
 }
 
 /**
+ * @brief Uses getsockname to get server socket data
+ *
+ * @return a sockaddr_in struct with the server information
+ */
+sockaddr_in network::tcp::server::getSocketData()
+{
+    sockaddr_in socket_data;
+    memset(&socket_data, 0, sizeof(socket_data));
+    socklen_t socket_data_length = sizeof(socket_data);
+    if (getsockname(this->socket_fd, (sockaddr *)&socket_data, &socket_data_length) != 0)
+        this->addError("Cannot get socket data");
+
+    return socket_data;
+}
+
+/**
+ * @brief Used to get the server IP address
+ *
+ * @return the server IP address as a std::string
+ */
+std::string network::tcp::server::getAddress()
+{
+    return inet_ntoa(this->getSocketData().sin_addr);
+}
+
+/**
+ * @brief Used to get the server port
+ *
+ * @return the server port as a std::string
+ */
+std::string network::tcp::server::getPort()
+{
+    return std::to_string(this->getSocketData().sin_port);
+}
+
+/**
  * @brief Gets the server socket file descriptor
  *
  * @return the server socket file descriptor
