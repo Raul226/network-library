@@ -99,7 +99,7 @@ std::string network::tcp::connection::getAddress()
  */
 std::string network::tcp::connection::getPort()
 {
-    return std::to_string(this->getSocketData().sin_port);
+    return std::to_string(ntohs(this->getSocketData().sin_port));
 }
 /**
  * @brief It shutdown the socket

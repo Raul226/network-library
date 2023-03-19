@@ -131,7 +131,7 @@ std::string network::udp::datagram::getAddress()
  */
 std::string network::udp::datagram::getPort()
 {
-    return std::to_string(this->getSocketData().sin_port);
+    return std::to_string(ntohs(this->getSocketData().sin_port));
 }
 
 /**

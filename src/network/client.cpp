@@ -132,7 +132,7 @@ std::string network::tcp::client::getAddress()
  */
 std::string network::tcp::client::getPort()
 {
-    return std::to_string(this->getSocketData().sin_port);
+    return std::to_string(ntohs(this->getSocketData().sin_port));
 }
 
 /**
