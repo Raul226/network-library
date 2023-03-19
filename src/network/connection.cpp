@@ -76,7 +76,7 @@ sockaddr_in network::tcp::connection::getSocketData()
     sockaddr_in socket_data;
     memset(&socket_data, 0, sizeof(socket_data));
     socklen_t socket_data_length = sizeof(socket_data);
-    if (getsockname(this->socket_fd, (sockaddr *)&socket_data, &socket_data_length) != 0)
+    if (getpeername(this->socket_fd, (sockaddr *)&socket_data, &socket_data_length) != 0)
         this->addError("Cannot get socket data");
 
     return socket_data;
