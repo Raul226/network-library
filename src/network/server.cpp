@@ -48,15 +48,10 @@ void network::tcp::server::hintSetup(int family, int flags)
  */
 bool network::tcp::server::setLocalSocketAddress(std::string port)
 {
-    if (getaddrinfo(0, port.c_str(), &(this->hints), &(this->result)) != 0)
-    {
-        this->addError("Cannot get address info!");
+    if (getaddrinfo(0, port.c_str(), &(this->hints), &(this->result)) == -1)
         return false;
-    }
     else
-    {
         return true;
-    }
 }
 
 /**
@@ -69,14 +64,9 @@ bool network::tcp::server::createSocket()
 {
     this->socket_fd = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
     if (this->socket_fd == -1)
-    {
-        this->addError("Cannot initialize socket!");
         return false;
-    }
     else
-    {
         return true;
-    }
 }
 
 /**
@@ -88,24 +78,23 @@ bool network::tcp::server::createSocket()
 bool network::tcp::server::bindSocket()
 {
     if (bind(this->socket_fd, this->result->ai_addr, this->result->ai_addrlen) == -1)
-    {
-        this->addError("Cannot bind socket!");
         return false;
-    }
     else
-    {
         return true;
-    }
 }
 
 /**
  * @brief Puts the socket into listening
  *
+ * @return true if listening
+ * @return false if it failed
  */
-void network::tcp::server::listenSocket()
+bool network::tcp::server::listenSocket()
 {
     if (listen(this->socket_fd, 0) == -1)
-        this->addError("Cannot listen!");
+        return false;
+    else
+        return true;
 }
 
 /**
@@ -116,31 +105,27 @@ void network::tcp::server::listenSocket()
 int network::tcp::server::acceptConnection()
 {
     int client_socket_fd = accept(this->socket_fd, 0, 0);
-    if (client_socket_fd != -1)
-    {
-        return client_socket_fd;
-    }
+    if (client_socket_fd == -1)
+        return -1;
     else
-    {
-        return 0;
-    }
-    return 0;
+        return client_socket_fd;
 }
 
 /**
  * @brief Uses getsockname to get server socket data
  *
- * @return a sockaddr_in struct with the server information
+ * @param socket_data the pointer to the structure where the socket data will get saved
+ * @return true if socket data was saved
+ * @return false if it failed
  */
-sockaddr_in network::tcp::server::getSocketData()
+bool network::tcp::server::getSocketData(sockaddr_in *socket_data)
 {
-    sockaddr_in socket_data;
-    memset(&socket_data, 0, sizeof(socket_data));
-    socklen_t socket_data_length = sizeof(socket_data);
-    if (getsockname(this->socket_fd, (sockaddr *)&socket_data, &socket_data_length) != 0)
-        this->addError("Cannot get socket data");
-
-    return socket_data;
+    memset(socket_data, 0, sizeof(sockaddr_in));
+    socklen_t socket_data_length = sizeof(sockaddr_in);
+    if (getsockname(this->socket_fd, (sockaddr *)socket_data, &socket_data_length) == -1)
+        return false;
+    else
+        return true;
 }
 
 /**
@@ -150,7 +135,11 @@ sockaddr_in network::tcp::server::getSocketData()
  */
 std::string network::tcp::server::getAddress()
 {
-    return inet_ntoa(this->getSocketData().sin_addr);
+    sockaddr_in socket_data;
+    if (this->getSocketData(&socket_data))
+        return inet_ntoa(socket_data.sin_addr);
+    else
+        return "";
 }
 
 /**
@@ -160,7 +149,11 @@ std::string network::tcp::server::getAddress()
  */
 std::string network::tcp::server::getPort()
 {
-    return std::to_string(ntohs(this->getSocketData().sin_port));
+    sockaddr_in socket_data;
+    if (this->getSocketData(&socket_data))
+        return std::to_string(ntohs(socket_data.sin_port));
+    else
+        return "";
 }
 
 /**
@@ -177,21 +170,34 @@ unsigned int network::tcp::server::getSocketFileDescriptor()
  * @brief It shutdown the socket
  *
  * @param how How to shutdown the socket(SHUTDOWN_RECEIVE, SHUTDOWN_SEND or SHUTDOWN_BOTH)
+ * @return true if the socket was shutdown
+ * @return false if it failed
  */
-void network::tcp::server::shutdownSocket(int how)
+bool network::tcp::server::shutdownSocket(int how)
 {
-    shutdown(this->socket_fd, how);
+    if (shutdown(this->socket_fd, how) == -1)
+        return false;
+    else
+        return true;
 }
 
 /**
  * @brief It closes the socket file descriptor(on _WIN32 system it calls both closesocket and WSACleanup)
+ *
+ * @return true if the socket was closed
+ * @return false if it failed
  */
-void network::tcp::server::closeSocket()
+bool network::tcp::server::closeSocket()
 {
 #ifdef _WIN32
-    closesocket(this->socket_fd);
-    WSACleanup();
+    if (closesocket(this->socket_fd) == -1 || WSACleanup() == -1)
+        return false;
+    else
+        return true;
 #else
-    close(this->socket_fd);
+    if (close(this->socket_fd) == -1)
+        return false;
+    else
+        return true;
 #endif
 }

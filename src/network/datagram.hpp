@@ -12,8 +12,6 @@
 #include <string>
 #include <cstring>
 
-#include "log.hpp"
-
 #define SHUTDOWN_RECEIVE 0
 #define SHUTDOWN_SEND 1
 #define SHUTDOWN_BOTH 3
@@ -22,7 +20,7 @@ namespace network
 {
     namespace udp
     {
-        class datagram : public logs::error
+        class datagram
         {
         public:
             datagram();
@@ -34,17 +32,17 @@ namespace network
             std::string getAddress();
             std::string getPort();
             unsigned int getSocketFileDescriptor();
-            void sendBufferTo(std::string address, std::string port, char *buffer, unsigned int buffer_size);
+            bool sendBufferTo(std::string address, std::string port, char *buffer, unsigned int buffer_size);
             unsigned int receiveBufferFrom(std::string address, std::string port, char *buffer, unsigned int buffer_size);
-            void shutdownSocket(int how);
-            void closeSocket();
+            bool shutdownSocket(int how);
+            bool closeSocket();
 
         private:
-            sockaddr_in getSocketData();
+            bool getSocketData(sockaddr_in *socket_data);
 #ifdef _WIN32
             WSADATA wsaData;
 #endif
-            int socket_fd;
+            int socket_fd = -1;
             struct addrinfo hints;
             struct addrinfo *result;
         };

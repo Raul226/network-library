@@ -12,8 +12,6 @@
 #include <string>
 #include <cstring>
 
-#include "log.hpp"
-
 #define SHUTDOWN_RECEIVE 0
 #define SHUTDOWN_SEND 1
 #define SHUTDOWN_BOTH 3
@@ -22,7 +20,7 @@ namespace network
 {
     namespace tcp
     {
-        class server : public logs::error
+        class server
         {
         public:
             server();
@@ -31,20 +29,20 @@ namespace network
             bool setLocalSocketAddress(std::string port);
             bool createSocket();
             bool bindSocket();
-            void listenSocket();
+            bool listenSocket();
             int acceptConnection();
             std::string getAddress();
             std::string getPort();
             unsigned int getSocketFileDescriptor();
-            void shutdownSocket(int how);
-            void closeSocket();
+            bool shutdownSocket(int how);
+            bool closeSocket();
 
         private:
-            sockaddr_in getSocketData();
+            bool getSocketData(sockaddr_in *socket_data);
 #ifdef _WIN32
             WSADATA wsaData;
 #endif
-            int socket_fd;
+            int socket_fd = -1;
             struct addrinfo hints;
             struct addrinfo *result;
         };

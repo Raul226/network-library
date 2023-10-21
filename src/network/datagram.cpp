@@ -48,15 +48,10 @@ void network::udp::datagram::hintSetup(int family, int flags)
  */
 bool network::udp::datagram::setLocalSocketAddress(std::string port)
 {
-    if (getaddrinfo(0, port.c_str(), &(this->hints), &(this->result)) != 0)
-    {
-        this->addError("Cannot get address info!");
+    if (getaddrinfo(0, port.c_str(), &(this->hints), &(this->result)) == -1)
         return false;
-    }
     else
-    {
         return true;
-    }
 }
 
 /**
@@ -69,14 +64,9 @@ bool network::udp::datagram::createSocket()
 {
     this->socket_fd = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
     if (this->socket_fd == -1)
-    {
-        this->addError("Cannot initialize socket!");
         return false;
-    }
     else
-    {
         return true;
-    }
 }
 
 /**
@@ -88,30 +78,26 @@ bool network::udp::datagram::createSocket()
 bool network::udp::datagram::bindSocket()
 {
     if (bind(this->socket_fd, this->result->ai_addr, this->result->ai_addrlen) == -1)
-    {
-        this->addError("Cannot bind socket!");
         return false;
-    }
     else
-    {
         return true;
-    }
 }
 
 /**
  * @brief Uses getsockname to get datagram socket data
  *
- * @return a sockaddr_in struct with the datagram information
+ * @param socket_data the pointer to the structure where the socket data will get saved
+ * @return true if socket data was saved
+ * @return false if it failed
  */
-sockaddr_in network::udp::datagram::getSocketData()
+bool network::udp::datagram::getSocketData(sockaddr_in *socket_data)
 {
-    sockaddr_in socket_data;
-    memset(&socket_data, 0, sizeof(socket_data));
-    socklen_t socket_data_length = sizeof(socket_data);
-    if (getsockname(this->socket_fd, (sockaddr *)&socket_data, &socket_data_length) != 0)
-        this->addError("Cannot get socket data");
-
-    return socket_data;
+    memset(socket_data, 0, sizeof(sockaddr_in));
+    socklen_t socket_data_length = sizeof(sockaddr_in);
+    if (getsockname(this->socket_fd, (sockaddr *)socket_data, &socket_data_length) == -1)
+        return false;
+    else
+        return true;
 }
 
 /**
@@ -121,7 +107,11 @@ sockaddr_in network::udp::datagram::getSocketData()
  */
 std::string network::udp::datagram::getAddress()
 {
-    return inet_ntoa(this->getSocketData().sin_addr);
+    sockaddr_in socket_data;
+    if (this->getSocketData(&socket_data))
+        return inet_ntoa(socket_data.sin_addr);
+    else
+        return "";
 }
 
 /**
@@ -131,7 +121,11 @@ std::string network::udp::datagram::getAddress()
  */
 std::string network::udp::datagram::getPort()
 {
-    return std::to_string(ntohs(this->getSocketData().sin_port));
+    sockaddr_in socket_data;
+    if (this->getSocketData(&socket_data))
+        return std::to_string(ntohs(socket_data.sin_port));
+    else
+        return "";
 }
 
 /**
@@ -151,8 +145,10 @@ unsigned int network::udp::datagram::getSocketFileDescriptor()
  * @param port Port
  * @param buffer Buffer
  * @param buffer_size Buffer Size
+ * @return true if the buffer was sent
+ * @return false if it failed
  */
-void network::udp::datagram::sendBufferTo(std::string address, std::string port, char *buffer, unsigned int buffer_size)
+bool network::udp::datagram::sendBufferTo(std::string address, std::string port, char *buffer, unsigned int buffer_size)
 {
     struct addrinfo *udp_addrinfo_result;
     struct addrinfo udp_addrinfo_hints;
@@ -164,15 +160,13 @@ void network::udp::datagram::sendBufferTo(std::string address, std::string port,
     udp_addrinfo_hints.ai_protocol = IPPROTO_UDP;
     udp_addrinfo_hints.ai_flags = AI_PASSIVE;
 
-    if (getaddrinfo(address.c_str(), port.c_str(), &udp_addrinfo_hints, &udp_addrinfo_result) != 0)
-    {
-        this->addError("Cannot get udp addrinfo!");
-    }
+    if (getaddrinfo(address.c_str(), port.c_str(), &udp_addrinfo_hints, &udp_addrinfo_result) == -1)
+        return false;
+
+    if (sendto(this->socket_fd, buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, udp_addrinfo_result->ai_addrlen) == -1)
+        return false;
     else
-    {
-        if (sendto(this->socket_fd, buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, udp_addrinfo_result->ai_addrlen) == -1)
-            this->addError("Cannot send buffer!");
-    }
+        return true;
 }
 
 /**
@@ -196,10 +190,9 @@ unsigned int network::udp::datagram::receiveBufferFrom(std::string address, std:
     udp_addrinfo_hints.ai_protocol = IPPROTO_UDP;
     udp_addrinfo_hints.ai_flags = AI_PASSIVE;
 
-    if (getaddrinfo(address.c_str(), port.c_str(), &udp_addrinfo_hints, &udp_addrinfo_result) != 0)
+    if (getaddrinfo(address.c_str(), port.c_str(), &udp_addrinfo_hints, &udp_addrinfo_result) == -1)
     {
-        this->addError("Cannot get udp addrinfo!");
-        return 0;
+        return -1;
     }
     else
     {
@@ -212,14 +205,9 @@ unsigned int network::udp::datagram::receiveBufferFrom(std::string address, std:
         receive = recvfrom(this->socket_fd, buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, &udp_addrinfo_result->ai_addrlen);
 #endif
         if (receive == -1)
-        {
-            this->addError("Cannot receive buffer");
-            return 0;
-        }
+            return -1;
         else
-        {
             return receive;
-        }
     }
 }
 
@@ -227,21 +215,34 @@ unsigned int network::udp::datagram::receiveBufferFrom(std::string address, std:
  * @brief It shutdown the socket
  *
  * @param how How to shutdown the socket(SHUTDOWN_RECEIVE, SHUTDOWN_SEND or SHUTDOWN_BOTH)
+ * @return true if the socket was shutdown
+ * @return false if it failed
  */
-void network::udp::datagram::shutdownSocket(int how)
+bool network::udp::datagram::shutdownSocket(int how)
 {
-    shutdown(this->socket_fd, how);
+    if (shutdown(this->socket_fd, how) == -1)
+        return false;
+    else
+        return true;
 }
 
 /**
  * @brief It closes the socket file descriptor(on _WIN32 system it calls both closesocket and WSACleanup)
+ *
+ * @return true if the socket was closed
+ * @return false if it failed
  */
-void network::udp::datagram::closeSocket()
+bool network::udp::datagram::closeSocket()
 {
 #ifdef _WIN32
-    closesocket(this->socket_fd);
-    WSACleanup();
+    if (closesocket(this->socket_fd) == -1 || WSACleanup() == -1)
+        return false;
+    else
+        return true;
 #else
-    close(this->socket_fd);
+    if (close(this->socket_fd) == -1)
+        return false;
+    else
+        return true;
 #endif
 }
