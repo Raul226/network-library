@@ -41,7 +41,7 @@ int main()
     network::tcp::server *netServer = new network::tcp::server();
     network::tcp::connection *netClient;
 
-    char *buffer = new char[MAX_BUFFER_SIZE];
+    unsigned char *buffer = new unsigned char[MAX_BUFFER_SIZE];
 
     netServer->hintSetup(AF_INET, AI_PASSIVE);
     netServer->setLocalSocketAddress("3000");
@@ -74,7 +74,7 @@ int main()
 {
     network::tcp::client *netClient = new network::tcp::client();
 
-    char *buffer = new char[MAX_BUFFER_SIZE];
+    unsigned char *buffer = new unsigned char[MAX_BUFFER_SIZE];
     strcpy(buffer, "Hello World!");
 
     netClient->hintSetup(AF_INET, AI_PASSIVE);
@@ -106,7 +106,7 @@ int main()
 {
     network::udp::datagram *netServer = new network::udp::datagram();
 
-    char *buffer = new char[MAX_BUFFER_SIZE];
+    unsigned char *buffer = new unsigned char[MAX_BUFFER_SIZE];
 
     netServer->hintSetup(AF_INET, AI_PASSIVE);
     netServer->setLocalSocketAddress("3000");
@@ -134,7 +134,7 @@ int main()
 {
     network::udp::datagram *netClient = new network::udp::datagram();
 
-    char *buffer = new char[MAX_BUFFER_SIZE];
+    unsigned char *buffer = new unsigned char[MAX_BUFFER_SIZE];
 
     strcpy(buffer, "Hello World!");
 

@@ -32,8 +32,8 @@ namespace network
             std::string getAddress();
             std::string getPort();
             unsigned int getSocketFileDescriptor();
-            bool sendBufferTo(std::string address, std::string port, char *buffer, unsigned int buffer_size);
-            unsigned int receiveBufferFrom(std::string address, std::string port, char *buffer, unsigned int buffer_size);
+            bool sendBufferTo(std::string address, std::string port, unsigned char *buffer, unsigned int buffer_size);
+            unsigned int receiveBufferFrom(std::string address, std::string port, unsigned char *buffer, unsigned int buffer_size);
             bool shutdownSocket(int how);
             bool closeSocket();
 

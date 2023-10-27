@@ -41,7 +41,7 @@ unsigned int network::tcp::connection::getSocketFileDescriptor()
  * @return true if the buffer was sent
  * @return false if it failed
  */
-bool network::tcp::connection::sendBuffer(char *buffer, unsigned int buffer_size)
+bool network::tcp::connection::sendBuffer(unsigned char *buffer, unsigned int buffer_size)
 {
     if (send(this->socket_fd, buffer, buffer_size, 0) == -1)
         return false;
@@ -56,7 +56,7 @@ bool network::tcp::connection::sendBuffer(char *buffer, unsigned int buffer_size
  * @return The size of the received buffer
  * @return -1 if it failed
  */
-unsigned int network::tcp::connection::receiveBuffer(char *buffer, unsigned int buffer_size)
+unsigned int network::tcp::connection::receiveBuffer(unsigned char *buffer, unsigned int buffer_size)
 {
     memset(buffer, 0, buffer_size);
     int receive = recv(this->socket_fd, buffer, buffer_size, 0);

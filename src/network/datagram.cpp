@@ -148,7 +148,7 @@ unsigned int network::udp::datagram::getSocketFileDescriptor()
  * @return true if the buffer was sent
  * @return false if it failed
  */
-bool network::udp::datagram::sendBufferTo(std::string address, std::string port, char *buffer, unsigned int buffer_size)
+bool network::udp::datagram::sendBufferTo(std::string address, std::string port, unsigned char *buffer, unsigned int buffer_size)
 {
     struct addrinfo *udp_addrinfo_result;
     struct addrinfo udp_addrinfo_hints;
@@ -178,7 +178,7 @@ bool network::udp::datagram::sendBufferTo(std::string address, std::string port,
  * @param buffer_size Buffer Size
  * @return The size of the received buffer
  */
-unsigned int network::udp::datagram::receiveBufferFrom(std::string address, std::string port, char *buffer, unsigned int buffer_size)
+unsigned int network::udp::datagram::receiveBufferFrom(std::string address, std::string port, unsigned char *buffer, unsigned int buffer_size)
 {
     struct addrinfo *udp_addrinfo_result;
     struct addrinfo udp_addrinfo_hints;
