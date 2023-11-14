@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 project(network VERSION 1.0)
 
 add_library(network src/server.cpp src/client.cpp src/connection.cpp src/datagram.cpp)
-target_include_directories(network PUBLIC src/)
+target_include_directories(network PUBLIC include/)
 
 if(WIN32)
     target_link_libraries(network PUBLIC Ws2_32.lib)
