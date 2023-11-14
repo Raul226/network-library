@@ -18,22 +18,22 @@
 
 namespace network
 {
-    namespace udp
+    namespace tcp
     {
-        class datagram
+        class client
         {
         public:
-            datagram();
-            ~datagram();
+            client();
+            ~client();
             void hintSetup(int family, int flags);
-            bool setLocalSocketAddress(std::string port);
+            bool setSocketAddress(std::string address, std::string port);
             bool createSocket();
-            bool bindSocket();
+            bool connectSocket();
             std::string getAddress();
             std::string getPort();
             unsigned int getSocketFileDescriptor();
-            bool sendBufferTo(std::string address, std::string port, unsigned char *buffer, unsigned int buffer_size);
-            unsigned int receiveBufferFrom(std::string address, std::string port, unsigned char *buffer, unsigned int buffer_size);
+            bool sendBuffer(void *buffer, unsigned int buffer_size);
+            unsigned int receiveBuffer(void *buffer, unsigned int buffer_size);
             bool shutdownSocket(int how);
             bool closeSocket();
 

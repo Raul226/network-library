@@ -4,6 +4,7 @@
 #include <WS2tcpip.h>
 #else
 #include <sys/socket.h>
+#include <netdb.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #endif
@@ -17,18 +18,22 @@
 
 namespace network
 {
-    namespace tcp
+    namespace udp
     {
-        class connection
+        class datagram
         {
         public:
-            connection(int socket_fd);
-            ~connection();
-            unsigned int getSocketFileDescriptor();
-            bool sendBuffer(unsigned char *buffer, unsigned int buffer_size);
-            unsigned int receiveBuffer(unsigned char *buffer, unsigned int buffer_size);
+            datagram();
+            ~datagram();
+            void hintSetup(int family, int flags);
+            bool setLocalSocketAddress(std::string port);
+            bool createSocket();
+            bool bindSocket();
             std::string getAddress();
             std::string getPort();
+            unsigned int getSocketFileDescriptor();
+            bool sendBufferTo(std::string address, std::string port, void *buffer, unsigned int buffer_size);
+            unsigned int receiveBufferFrom(std::string address, std::string port, void *buffer, unsigned int buffer_size);
             bool shutdownSocket(int how);
             bool closeSocket();
 
@@ -38,6 +43,8 @@ namespace network
             WSADATA wsaData;
 #endif
             int socket_fd = -1;
+            struct addrinfo hints;
+            struct addrinfo *result;
         };
     }
 }

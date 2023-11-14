@@ -142,12 +142,12 @@ unsigned int network::tcp::client::getSocketFileDescriptor()
 /**
  * @brief Sends a buffer to the connected socket
  *
- * @param buffer Buffer
+ * @param buffer Pointer to the buffer
  * @param buffer_size Buffer Size
  * @return true if the buffer was sent
  * @return false if it failed
  */
-bool network::tcp::client::sendBuffer(unsigned char *buffer, unsigned int buffer_size)
+bool network::tcp::client::sendBuffer(void *buffer, unsigned int buffer_size)
 {
     if (send(this->socket_fd, buffer, buffer_size, 0) == -1)
         return false;
@@ -158,12 +158,12 @@ bool network::tcp::client::sendBuffer(unsigned char *buffer, unsigned int buffer
 /**
  * @brief Receive a buffer from the connection
  *
- * @param buffer Buffer
+ * @param buffer Pointer to the buffer
  * @param buffer_size Buffer Size
  * @return The size of the received buffer
  * @return -1 if it failed
  */
-unsigned int network::tcp::client::receiveBuffer(unsigned char *buffer, unsigned int buffer_size)
+unsigned int network::tcp::client::receiveBuffer(void *buffer, unsigned int buffer_size)
 {
     memset(buffer, 0, buffer_size);
     int receive = recv(this->socket_fd, buffer, buffer_size, 0);
