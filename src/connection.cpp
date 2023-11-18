@@ -70,7 +70,7 @@ unsigned int network::tcp::connection::receiveBuffer(void *buffer, unsigned int 
 #ifdef _WIN32
     receive = recv(this->socket_fd, (char *)buffer, buffer_size, 0);
 #else
-    receive = recv(this->socket_fd, buffer, buffer_size, 0)
+    receive = recv(this->socket_fd, buffer, buffer_size, 0);
 #endif
     if (receive == -1)
         return -1;

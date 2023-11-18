@@ -162,7 +162,7 @@ bool network::udp::datagram::sendBufferTo(std::string address, std::string port,
 #ifdef _WIN32
     status = sendto(this->socket_fd, (char *)buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, (int)udp_addrinfo_result->ai_addrlen);
 #else
-    status = sendto(this->socket_fd, buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, udp_addrinfo_result->ai_addrlen)
+    status = sendto(this->socket_fd, buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, udp_addrinfo_result->ai_addrlen);
 #endif
 
     if (status == -1)
