@@ -1,5 +1,17 @@
 #include "connection.hpp"
 
+#ifdef _WIN32
+/**
+ * @brief Creates a network client connection object using the socket file descriptor received
+ *
+ * @param socket_fd Socket file descriptor
+ */
+network::tcp::connection::connection(SOCKET socket_fd)
+{
+    WSAStartup(MAKEWORD(2, 2), &(network::tcp::connection::wsaData));
+    this->socket_fd = socket_fd;
+}
+#else
 /**
  * @brief Creates a network client connection object using the socket file descriptor received
  *
@@ -7,11 +19,9 @@
  */
 network::tcp::connection::connection(int socket_fd)
 {
-#ifdef _WIN32
-    WSAStartup(MAKEWORD(2, 2), &(network::tcp::connection::wsaData));
-#endif
     this->socket_fd = socket_fd;
 }
+#endif
 
 /**
  * @brief Used to close the client connection socket
@@ -88,13 +98,18 @@ bool network::tcp::connection::getSocketData(sockaddr_in *socket_data)
 /**
  * @brief Used to get the connection IP address
  *
- * @return the connection IP address as a std::string
+ * @return the server IP address as a std::string
  */
 std::string network::tcp::connection::getAddress()
 {
     sockaddr_in socket_data;
+    char address[INET_ADDRSTRLEN];
+
     if (this->getSocketData(&socket_data))
-        return inet_ntoa(socket_data.sin_addr);
+        if (inet_ntop(AF_INET, &(socket_data.sin_addr), address, INET_ADDRSTRLEN) == NULL)
+            return "";
+        else
+            return address;
     else
         return "";
 }

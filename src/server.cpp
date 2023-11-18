@@ -121,8 +121,13 @@ bool network::tcp::server::getSocketData(sockaddr_in *socket_data)
 std::string network::tcp::server::getAddress()
 {
     sockaddr_in socket_data;
+    char address[INET_ADDRSTRLEN];
+
     if (this->getSocketData(&socket_data))
-        return inet_ntoa(socket_data.sin_addr);
+        if (inet_ntop(AF_INET, &(socket_data.sin_addr), address, INET_ADDRSTRLEN) == NULL)
+            return "";
+        else
+            return address;
     else
         return "";
 }

@@ -22,7 +22,13 @@ namespace network
         class connection
         {
         public:
+#ifdef _WIN32
+            connection(SOCKET socket_fd);
+            SOCKET getSocketFileDescriptor();
+#else
             connection(int socket_fd);
+            int getSocketFileDescriptor();
+#endif
             ~connection();
             bool sendBuffer(void *buffer, unsigned int buffer_size);
             unsigned int receiveBuffer(void *buffer, unsigned int buffer_size);
@@ -30,12 +36,6 @@ namespace network
             std::string getPort();
             bool shutdownSocket(int how);
             bool closeSocket();
-
-#ifdef _WIN32
-            SOCKET getSocketFileDescriptor();
-#else
-            int getSocketFileDescriptor();
-#endif
 
         private:
             bool getSocketData(sockaddr_in *socket_data);
