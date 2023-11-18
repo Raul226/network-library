@@ -61,11 +61,11 @@ bool network::tcp::server::setLocalSocketAddress(std::string port)
  */
 bool network::tcp::server::createSocket()
 {
-    // this->socket_fd = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
-    // if (this->socket_fd == -1)
-    //     return false;
-    // else
-    //     return true;
+    this->socket_fd = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
+    if (this->socket_fd == -1)
+        return false;
+    else
+        return true;
 }
 
 /**
