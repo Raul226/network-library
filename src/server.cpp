@@ -8,8 +8,7 @@
 network::tcp::server::server()
 {
 #ifdef _WIN32
-    if (WSAStartup(MAKEWORD(2, 2), &(network::tcp::server::wsaData)) != 0)
-        this->addError("Cannot initialize ws2!");
+    WSAStartup(MAKEWORD(2, 2), &(network::tcp::server::wsaData)
 #endif
     memset(&(this->hints), 0, sizeof(this->hints));
 }

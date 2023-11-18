@@ -8,8 +8,7 @@
 network::tcp::connection::connection(int socket_fd)
 {
 #ifdef _WIN32
-    if (WSAStartup(MAKEWORD(2, 2), &(network::tcp::connection::wsaData)) != 0)
-        this->addError("Cannot initialize ws2!");
+    WSAStartup(MAKEWORD(2, 2), &(network::tcp::connection::wsaData)
 #endif
     this->socket_fd = socket_fd;
 }
