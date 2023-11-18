@@ -8,7 +8,7 @@
 network::tcp::server::server()
 {
 #ifdef _WIN32
-    WSAStartup(MAKEWORD(2, 2), &(network::tcp::server::wsaData)
+    WSAStartup(MAKEWORD(2, 2), &(network::tcp::server::wsaData));
 #endif
     memset(&(this->hints), 0, sizeof(this->hints));
 }

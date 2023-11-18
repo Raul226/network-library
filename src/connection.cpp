@@ -8,7 +8,7 @@
 network::tcp::connection::connection(int socket_fd)
 {
 #ifdef _WIN32
-    WSAStartup(MAKEWORD(2, 2), &(network::tcp::connection::wsaData)
+    WSAStartup(MAKEWORD(2, 2), &(network::tcp::connection::wsaData));
 #endif
     this->socket_fd = socket_fd;
 }

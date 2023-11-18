@@ -8,7 +8,7 @@
 network::udp::datagram::datagram()
 {
 #ifdef _WIN32
-    WSAStartup(MAKEWORD(2, 2), &(network::udp::datagram::wsaData)
+    WSAStartup(MAKEWORD(2, 2), &(network::udp::datagram::wsaData));
 #endif
     memset(&(this->hints), 0, sizeof(this->hints));
 }
