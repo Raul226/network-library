@@ -30,19 +30,26 @@ namespace network
             bool createSocket();
             bool bindSocket();
             bool listenSocket();
-            int acceptConnection();
             std::string getAddress();
             std::string getPort();
-            unsigned int getSocketFileDescriptor();
             bool shutdownSocket(int how);
             bool closeSocket();
+#ifdef _WIN32
+            SOCKET acceptConnection();
+            SOCKET getSocketFileDescriptor();
+#else
+            int acceptConnection();
+            int getSocketFileDescriptor();
+#endif
 
         private:
             bool getSocketData(sockaddr_in *socket_data);
 #ifdef _WIN32
             WSADATA wsaData;
-#endif
+            SOCKET socket_fd = -1;
+#else
             int socket_fd = -1;
+#endif
             struct addrinfo hints;
             struct addrinfo *result;
         };

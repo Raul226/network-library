@@ -31,18 +31,24 @@ namespace network
             bool bindSocket();
             std::string getAddress();
             std::string getPort();
-            unsigned int getSocketFileDescriptor();
             bool sendBufferTo(std::string address, std::string port, void *buffer, unsigned int buffer_size);
             unsigned int receiveBufferFrom(std::string address, std::string port, void *buffer, unsigned int buffer_size);
             bool shutdownSocket(int how);
             bool closeSocket();
+#ifdef _WIN32
+            SOCKET getSocketFileDescriptor();
+#else
+            int getSocketFileDescriptor();
+#endif
 
         private:
             bool getSocketData(sockaddr_in *socket_data);
 #ifdef _WIN32
             WSADATA wsaData;
-#endif
+            SOCKET socket_fd = -1;
+#else
             int socket_fd = -1;
+#endif
             struct addrinfo hints;
             struct addrinfo *result;
         };

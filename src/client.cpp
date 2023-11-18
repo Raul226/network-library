@@ -77,7 +77,7 @@ bool network::tcp::client::createSocket()
  */
 bool network::tcp::client::connectSocket()
 {
-    if (connect(this->socket_fd, this->result->ai_addr, this->result->ai_addrlen) == -1)
+    if (connect(this->socket_fd, this->result->ai_addr, (int)this->result->ai_addrlen) == -1)
         return false;
     else
         return true;
@@ -129,16 +129,6 @@ std::string network::tcp::client::getPort()
 }
 
 /**
- * @brief Gets the client socket file descriptor
- *
- * @return the client socket file descriptor
- */
-unsigned int network::tcp::client::getSocketFileDescriptor()
-{
-    return this->socket_fd;
-}
-
-/**
  * @brief Sends a buffer to the connected socket
  *
  * @param buffer Pointer to the buffer
@@ -148,7 +138,13 @@ unsigned int network::tcp::client::getSocketFileDescriptor()
  */
 bool network::tcp::client::sendBuffer(void *buffer, unsigned int buffer_size)
 {
-    if (send(this->socket_fd, buffer, buffer_size, 0) == -1)
+    int status = -1;
+#ifdef _WIN32
+    status = send(this->socket_fd, (char *)buffer, buffer_size, 0);
+#else
+    status = send(this->socket_fd, buffer, buffer_size, 0);
+#endif
+    if (status == -1)
         return false;
     else
         return true;
@@ -164,8 +160,13 @@ bool network::tcp::client::sendBuffer(void *buffer, unsigned int buffer_size)
  */
 unsigned int network::tcp::client::receiveBuffer(void *buffer, unsigned int buffer_size)
 {
+    int receive = -1;
     memset(buffer, 0, buffer_size);
-    int receive = recv(this->socket_fd, buffer, buffer_size, 0);
+#ifdef _WIN32
+    receive = recv(this->socket_fd, (char *)buffer, buffer_size, 0);
+#else
+    receive = recv(this->socket_fd, buffer, buffer_size, 0);
+#endif
     if (receive == -1)
         return -1;
     else
@@ -207,3 +208,25 @@ bool network::tcp::client::closeSocket()
         return true;
 #endif
 }
+
+#ifdef _WIN32
+/**
+ * @brief Gets the client socket file descriptor
+ *
+ * @return the client socket file descriptor
+ */
+SOCKET network::tcp::client::getSocketFileDescriptor()
+{
+    return this->socket_fd;
+}
+#else
+/**
+ * @brief Gets the client socket file descriptor
+ *
+ * @return the client socket file descriptor
+ */
+int network::tcp::client::getSocketFileDescriptor()
+{
+    return this->socket_fd;
+}
+#endif

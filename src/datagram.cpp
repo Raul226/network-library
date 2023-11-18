@@ -76,7 +76,7 @@ bool network::udp::datagram::createSocket()
  */
 bool network::udp::datagram::bindSocket()
 {
-    if (bind(this->socket_fd, this->result->ai_addr, this->result->ai_addrlen) == -1)
+    if (bind(this->socket_fd, this->result->ai_addr, (int)this->result->ai_addrlen) == -1)
         return false;
     else
         return true;
@@ -128,16 +128,6 @@ std::string network::udp::datagram::getPort()
 }
 
 /**
- * @brief Gets the datagram socket file descriptor
- *
- * @return the datagram socket file descriptor
- */
-unsigned int network::udp::datagram::getSocketFileDescriptor()
-{
-    return this->socket_fd;
-}
-
-/**
  * @brief Sends a buffer to the specified address and port
  *
  * @param address Address
@@ -152,6 +142,8 @@ bool network::udp::datagram::sendBufferTo(std::string address, std::string port,
     struct addrinfo *udp_addrinfo_result;
     struct addrinfo udp_addrinfo_hints;
 
+    int status = -1;
+
     memset(&udp_addrinfo_hints, 0, sizeof(udp_addrinfo_hints));
 
     udp_addrinfo_hints.ai_family = AF_INET;
@@ -162,7 +154,13 @@ bool network::udp::datagram::sendBufferTo(std::string address, std::string port,
     if (getaddrinfo(address.c_str(), port.c_str(), &udp_addrinfo_hints, &udp_addrinfo_result) == -1)
         return false;
 
-    if (sendto(this->socket_fd, buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, udp_addrinfo_result->ai_addrlen) == -1)
+#ifdef _WIN32
+    status = sendto(this->socket_fd, (char *)buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, (int)udp_addrinfo_result->ai_addrlen);
+#else
+    status = sendto(this->socket_fd, buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, udp_addrinfo_result->ai_addrlen)
+#endif
+
+    if (status == -1)
         return false;
     else
         return true;
@@ -195,11 +193,11 @@ unsigned int network::udp::datagram::receiveBufferFrom(std::string address, std:
     }
     else
     {
-        memset(buffer, 0, buffer_size);
         int receive = -1;
+        memset(buffer, 0, buffer_size);
 #ifdef _WIN32
         int addrinfo_len = (int)udp_addrinfo_result->ai_addrlen;
-        receive = recvfrom(this->socket_fd, buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, &addrinfo_len);
+        receive = recvfrom(this->socket_fd, (char *)buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, &addrinfo_len);
 #else
         receive = recvfrom(this->socket_fd, buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, &udp_addrinfo_result->ai_addrlen);
 #endif
@@ -245,3 +243,25 @@ bool network::udp::datagram::closeSocket()
         return true;
 #endif
 }
+
+#ifdef _WIN32
+/**
+ * @brief Gets the datagram socket file descriptor
+ *
+ * @return the datagram socket file descriptor
+ */
+SOCKET network::udp::datagram::getSocketFileDescriptor()
+{
+    return this->socket_fd;
+}
+#else
+/**
+ * @brief Gets the datagram socket file descriptor
+ *
+ * @return the datagram socket file descriptor
+ */
+int network::udp::datagram::getSocketFileDescriptor()
+{
+    return this->socket_fd;
+}
+#endif

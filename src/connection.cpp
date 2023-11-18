@@ -24,16 +24,6 @@ network::tcp::connection::~connection()
 }
 
 /**
- * @brief Gets the connection socket file descriptor
- *
- * @return the connection socket file descriptor
- */
-unsigned int network::tcp::connection::getSocketFileDescriptor()
-{
-    return this->socket_fd;
-}
-
-/**
  * @brief Sends a buffer to the connected socket
  *
  * @param buffer Pointer to the buffer
@@ -43,7 +33,13 @@ unsigned int network::tcp::connection::getSocketFileDescriptor()
  */
 bool network::tcp::connection::sendBuffer(void *buffer, unsigned int buffer_size)
 {
-    if (send(this->socket_fd, buffer, buffer_size, 0) == -1)
+    int status = -1;
+#ifdef _WIN32
+    status = send(this->socket_fd, (char *)buffer, buffer_size, 0);
+#else
+    status = send(this->socket_fd, buffer, buffer_size, 0);
+#endif
+    if (status == -1)
         return false;
     else
         return true;
@@ -59,8 +55,13 @@ bool network::tcp::connection::sendBuffer(void *buffer, unsigned int buffer_size
  */
 unsigned int network::tcp::connection::receiveBuffer(void *buffer, unsigned int buffer_size)
 {
+    int receive = -1;
     memset(buffer, 0, buffer_size);
-    int receive = recv(this->socket_fd, buffer, buffer_size, 0);
+#ifdef _WIN32
+    receive = recv(this->socket_fd, (char *)buffer, buffer_size, 0);
+#else
+    receive = recv(this->socket_fd, buffer, buffer_size, 0)
+#endif
     if (receive == -1)
         return -1;
     else
@@ -146,3 +147,25 @@ bool network::tcp::connection::closeSocket()
         return true;
 #endif
 }
+
+#ifdef _WIN32
+/**
+ * @brief Gets the connection socket file descriptor
+ *
+ * @return the connection socket file descriptor
+ */
+SOCKET network::tcp::connection::getSocketFileDescriptor()
+{
+    return this->socket_fd;
+}
+#else
+/**
+ * @brief Gets the connection socket file descriptor
+ *
+ * @return the connection socket file descriptor
+ */
+int network::tcp::connection::getSocketFileDescriptor()
+{
+    return this->socket_fd;
+}
+#endif

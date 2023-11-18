@@ -24,7 +24,6 @@ namespace network
         public:
             connection(int socket_fd);
             ~connection();
-            unsigned int getSocketFileDescriptor();
             bool sendBuffer(void *buffer, unsigned int buffer_size);
             unsigned int receiveBuffer(void *buffer, unsigned int buffer_size);
             std::string getAddress();
@@ -32,12 +31,20 @@ namespace network
             bool shutdownSocket(int how);
             bool closeSocket();
 
+#ifdef _WIN32
+            SOCKET getSocketFileDescriptor();
+#else
+            int getSocketFileDescriptor();
+#endif
+
         private:
             bool getSocketData(sockaddr_in *socket_data);
 #ifdef _WIN32
             WSADATA wsaData;
-#endif
+            SOCKET socket_fd = -1;
+#else
             int socket_fd = -1;
+#endif
         };
     }
 }

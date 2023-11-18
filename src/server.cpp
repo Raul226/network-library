@@ -61,11 +61,11 @@ bool network::tcp::server::setLocalSocketAddress(std::string port)
  */
 bool network::tcp::server::createSocket()
 {
-    this->socket_fd = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
-    if (this->socket_fd == -1)
-        return false;
-    else
-        return true;
+    // this->socket_fd = socket(this->result->ai_family, this->result->ai_socktype, this->result->ai_protocol);
+    // if (this->socket_fd == -1)
+    //     return false;
+    // else
+    //     return true;
 }
 
 /**
@@ -76,7 +76,7 @@ bool network::tcp::server::createSocket()
  */
 bool network::tcp::server::bindSocket()
 {
-    if (bind(this->socket_fd, this->result->ai_addr, this->result->ai_addrlen) == -1)
+    if (bind(this->socket_fd, this->result->ai_addr, (int)this->result->ai_addrlen) == -1)
         return false;
     else
         return true;
@@ -94,20 +94,6 @@ bool network::tcp::server::listenSocket()
         return false;
     else
         return true;
-}
-
-/**
- * @brief Waits and accept any connection
- *
- * @return The connection socket file descriptor
- */
-int network::tcp::server::acceptConnection()
-{
-    int client_socket_fd = accept(this->socket_fd, 0, 0);
-    if (client_socket_fd == -1)
-        return -1;
-    else
-        return client_socket_fd;
 }
 
 /**
@@ -156,16 +142,6 @@ std::string network::tcp::server::getPort()
 }
 
 /**
- * @brief Gets the server socket file descriptor
- *
- * @return the server socket file descriptor
- */
-unsigned int network::tcp::server::getSocketFileDescriptor()
-{
-    return this->socket_fd;
-}
-
-/**
  * @brief It shutdown the socket
  *
  * @param how How to shutdown the socket(SHUTDOWN_RECEIVE, SHUTDOWN_SEND or SHUTDOWN_BOTH)
@@ -200,3 +176,57 @@ bool network::tcp::server::closeSocket()
         return true;
 #endif
 }
+
+#ifdef _WIN32
+
+/**
+ * @brief Waits and accept any connection
+ *
+ * @return The connection socket file descriptor
+ */
+SOCKET network::tcp::server::acceptConnection()
+{
+    SOCKET client_socket_fd = accept(this->socket_fd, 0, 0);
+    if (client_socket_fd == -1)
+        return -1;
+    else
+        return client_socket_fd;
+}
+
+/**
+ * @brief Gets the server socket file descriptor
+ *
+ * @return the server socket file descriptor
+ */
+SOCKET network::tcp::server::getSocketFileDescriptor()
+{
+    return this->socket_fd;
+}
+
+#else
+
+/**
+ * @brief Waits and accept any connection
+ *
+ * @return The connection socket file descriptor
+ */
+int network::tcp::server::acceptConnection()
+{
+    int client_socket_fd = accept(this->socket_fd, 0, 0);
+    if (client_socket_fd == -1)
+        return -1;
+    else
+        return client_socket_fd;
+}
+
+/**
+ * @brief Gets the server socket file descriptor
+ *
+ * @return the server socket file descriptor
+ */
+int network::tcp::server::getSocketFileDescriptor()
+{
+    return this->socket_fd;
+}
+
+#endif
