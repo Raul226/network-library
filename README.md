@@ -108,12 +108,16 @@ int main()
 
     unsigned char *buffer = new unsigned char[MAX_BUFFER_SIZE];
 
+    strcpy((char *)buffer, "Hello World!");
+
     netServer->hintSetup(AF_INET, AI_PASSIVE);
     netServer->setLocalSocketAddress("3000");
     netServer->createSocket();
     netServer->bindSocket();
 
-    unsigned int length = netServer->receiveBufferFrom("127.0.0.1", "3001", buffer, MAX_BUFFER_SIZE);
+    char address[DATAGRAM_ADDRESS_LENGTH];
+    int port;
+    unsigned int length = netServer->receiveBufferFrom(address, &port, buffer, MAX_BUFFER_SIZE);
 
     netServer->sendBufferTo("127.0.0.1", "3001", buffer, MAX_BUFFER_SIZE);
 
@@ -136,7 +140,7 @@ int main()
 
     unsigned char *buffer = new unsigned char[MAX_BUFFER_SIZE];
 
-    strcpy(buffer, "Hello World!");
+    strcpy((char *)buffer, "Hello World!");
 
     netClient->hintSetup(AF_INET, AI_PASSIVE);
     netClient->setLocalSocketAddress("3001");
@@ -145,7 +149,9 @@ int main()
 
     netClient->sendBufferTo("127.0.0.1", "3000", buffer, MAX_BUFFER_SIZE);
 
-    unsigned int length = netClient->receiveBufferFrom("127.0.0.1", "3000", buffer, MAX_BUFFER_SIZE);
+    char address[DATAGRAM_ADDRESS_LENGTH];
+    int port;
+    unsigned int length = netClient->receiveBufferFrom(address, &port, buffer, MAX_BUFFER_SIZE);
 
     netClient->shutdownSocket(SHUTDOWN_BOTH);
     netClient->closeSocket();

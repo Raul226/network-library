@@ -16,6 +16,8 @@
 #define SHUTDOWN_SEND 1
 #define SHUTDOWN_BOTH 3
 
+#define DATAGRAM_ADDRESS_LENGTH INET_ADDRSTRLEN
+
 namespace network
 {
     namespace udp
@@ -32,7 +34,7 @@ namespace network
             std::string getAddress();
             std::string getPort();
             bool sendBufferTo(std::string address, std::string port, void *buffer, unsigned int buffer_size);
-            unsigned int receiveBufferFrom(std::string address, std::string port, void *buffer, unsigned int buffer_size);
+            unsigned int receiveBufferFrom(char *address, int *port, void *buffer, unsigned int buffer_size);
             bool shutdownSocket(int how);
             bool closeSocket();
 #ifdef _WIN32

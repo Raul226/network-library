@@ -172,44 +172,45 @@ bool network::udp::datagram::sendBufferTo(std::string address, std::string port,
 }
 
 /**
- * @brief Receives a buffer from the specified address and port
+ * @brief Receives a buffer and retrieve the peer address and port
  *
- * @param address Address
- * @param port Port
+ * @param address Peer Address
+ * @param port Peer Port
  * @param buffer Pointer to the buffer
  * @param buffer_size Buffer Size
  * @return The size of the received buffer
  */
-unsigned int network::udp::datagram::receiveBufferFrom(std::string address, std::string port, void *buffer, unsigned int buffer_size)
+unsigned int network::udp::datagram::receiveBufferFrom(char *address, int *port, void *buffer, unsigned int buffer_size)
 {
-    struct addrinfo *udp_addrinfo_result;
-    struct addrinfo udp_addrinfo_hints;
+    sockaddr_in udp_addrinfo_result;
+    int addrinfo_len = sizeof(sockaddr_in);
+    char address_char[INET_ADDRSTRLEN];
 
-    memset(&udp_addrinfo_hints, 0, sizeof(udp_addrinfo_hints));
-
-    udp_addrinfo_hints.ai_family = AF_INET;
-    udp_addrinfo_hints.ai_socktype = SOCK_DGRAM;
-    udp_addrinfo_hints.ai_protocol = IPPROTO_UDP;
-    udp_addrinfo_hints.ai_flags = AI_PASSIVE;
-
-    if (getaddrinfo(address.c_str(), port.c_str(), &udp_addrinfo_hints, &udp_addrinfo_result) == -1)
+    int receive = -1;
+    memset(buffer, 0, buffer_size);
+#ifdef _WIN32
+    receive = recvfrom(this->socket_fd, (char *)buffer, buffer_size, 0, (sockaddr *)&udp_addrinfo_result, &addrinfo_len);
+#else
+    receive = recvfrom(this->socket_fd, buffer, buffer_size, 0, (sockaddr *)&udp_addrinfo_result, &addrinfo_len);
+#endif
+    if (receive == -1)
     {
+        memset(address, 0, DATAGRAM_ADDRESS_LENGTH);
+        *port = -1;
+
         return -1;
     }
     else
     {
-        int receive = -1;
-        memset(buffer, 0, buffer_size);
-#ifdef _WIN32
-        int addrinfo_len = (int)udp_addrinfo_result->ai_addrlen;
-        receive = recvfrom(this->socket_fd, (char *)buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, &addrinfo_len);
-#else
-        receive = recvfrom(this->socket_fd, buffer, buffer_size, 0, udp_addrinfo_result->ai_addr, &udp_addrinfo_result->ai_addrlen);
-#endif
-        if (receive == -1)
-            return -1;
-        else
-            return receive;
+        char address_char[INET_ADDRSTRLEN];
+        int udp_port = -1;
+        memset(address_char, 0, INET_ADDRSTRLEN);
+        inet_ntop(AF_INET, &(udp_addrinfo_result.sin_addr), address_char, INET_ADDRSTRLEN);
+        memcpy(address, address_char, DATAGRAM_ADDRESS_LENGTH);
+        udp_port = ntohs(udp_addrinfo_result.sin_port);
+        *port = udp_port;
+
+        return receive;
     }
 }
 
