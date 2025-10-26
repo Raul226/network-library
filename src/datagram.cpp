@@ -183,14 +183,15 @@ bool network::udp::datagram::sendBufferTo(std::string address, std::string port,
 unsigned int network::udp::datagram::receiveBufferFrom(char *address, int *port, void *buffer, unsigned int buffer_size)
 {
     sockaddr_in udp_addrinfo_result;
-    int addrinfo_len = sizeof(sockaddr_in);
     char address_char[INET_ADDRSTRLEN];
 
     int receive = -1;
     memset(buffer, 0, buffer_size);
 #ifdef _WIN32
+    int addrinfo_len = sizeof(sockaddr_in);
     receive = recvfrom(this->socket_fd, (char *)buffer, buffer_size, 0, (sockaddr *)&udp_addrinfo_result, &addrinfo_len);
 #else
+    unsigned int addrinfo_len = sizeof(sockaddr_in);
     receive = recvfrom(this->socket_fd, buffer, buffer_size, 0, (sockaddr *)&udp_addrinfo_result, &addrinfo_len);
 #endif
     if (receive == -1)
